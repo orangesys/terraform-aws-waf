@@ -51,11 +51,11 @@ resource "aws_wafv2_web_acl" "acl" {
     }
   }
 
-  tags = tags
+  tags = var.tags
 
   visibility_config {
     cloudwatch_metrics_enabled = false
-    metric_name                =  "${var.app_name}-${var.env}-metric"
+    metric_name                = "${var.app_name}-${var.env}-metric"
     sampled_requests_enabled   = false
   }
 }
