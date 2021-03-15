@@ -27,9 +27,9 @@ variable "tags" {
   default     = {}
 }
 
-variable "resource_arn" {
+variable "resource_arn_list" {
   description = "The Amazon Resource Name (ARN) of the resource to associate with the web ACL."
-  type        = string
+  type        = list(string)
 }
 
 

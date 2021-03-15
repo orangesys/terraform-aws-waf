@@ -60,7 +60,8 @@ resource "aws_wafv2_web_acl" "acl" {
   }
 }
 
-resource "aws_wafv2_web_acl_association" "example" {
-  resource_arn = var.resource_arn
+resource "aws_wafv2_web_acl_association" "_" {
+  for_each     = var.resource_arn_list
+  resource_arn = each.key
   web_acl_arn  = aws_wafv2_web_acl.acl.arn
 }
