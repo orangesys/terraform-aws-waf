@@ -26,3 +26,10 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "resource_arn" {
+  description = "The Amazon Resource Name (ARN) of the resource to associate with the web ACL."
+  type        = string
+}
+
+

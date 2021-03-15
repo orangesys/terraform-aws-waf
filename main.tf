@@ -59,3 +59,8 @@ resource "aws_wafv2_web_acl" "acl" {
     sampled_requests_enabled   = false
   }
 }
+
+resource "aws_wafv2_web_acl_association" "example" {
+  resource_arn = var.resource_arn
+  web_acl_arn  = aws_wafv2_web_acl.acl.arn
+}
