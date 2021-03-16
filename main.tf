@@ -16,27 +16,49 @@ resource "aws_wafv2_web_acl" "acl" {
     block {}
   }
 
-  rule {
-    name     = "default"
-    priority = 1
+  # rule {
+  #   name     = "rate"
+  #   priority = 1
 
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesCommonRuleSet"
-        vendor_name = "AWS"
-      }
-    }
+  #   action {
+  #     count {}
+  #   }
 
-    visibility_config {
-      cloudwatch_metrics_enabled = false
-      metric_name                = "${var.app_name}-${var.env}-default-rule-metric"
-      sampled_requests_enabled   = false
-    }
-  }
+  #   statement {
+  #     rate_based_statement {
+  #       limit              = 10000
+  #       aggregate_key_type = "IP"
+  #     }
+  #   }
+
+  #   visibility_config {
+  #     cloudwatch_metrics_enabled = false
+  #     metric_name                = "${var.app_name}-${var.env}-rate-rule-metric"
+  #     sampled_requests_enabled   = false
+  #   }
+  # }
+
+  # rule {
+  #   name     = "default"
+  #   priority = 2
+
+  #   statement {
+  #     managed_rule_group_statement {
+  #       name        = "AWSManagedRulesCommonRuleSet"
+  #       vendor_name = "AWS"
+  #     }
+  #   }
+
+  #   visibility_config {
+  #     cloudwatch_metrics_enabled = false
+  #     metric_name                = "${var.app_name}-${var.env}-default-rule-metric"
+  #     sampled_requests_enabled   = false
+  #   }
+  # }
 
   rule {
     name     = "blocklist"
-    priority = 2
+    priority = 3
 
     statement {
       ip_set_reference_statement {
