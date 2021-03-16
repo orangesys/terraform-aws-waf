@@ -60,6 +60,10 @@ resource "aws_wafv2_web_acl" "acl" {
     name     = "blocklist"
     priority = 3
 
+    override_action {
+      none {}
+    }
+
     statement {
       ip_set_reference_statement {
         arn = aws_wafv2_ip_set.blacklist.arn
