@@ -16,27 +16,27 @@ resource "aws_wafv2_web_acl" "acl" {
     block {}
   }
 
-  # rule {
-  #   name     = "rate"
-  #   priority = 1
+  rule {
+    name     = "rate"
+    priority = 1
 
-  #   action {
-  #     count {}
-  #   }
+    action {
+      count {}
+    }
 
-  #   statement {
-  #     rate_based_statement {
-  #       limit              = 10000
-  #       aggregate_key_type = "IP"
-  #     }
-  #   }
+    statement {
+      rate_based_statement {
+        limit              = 10000
+        aggregate_key_type = "IP"
+      }
+    }
 
-  #   visibility_config {
-  #     cloudwatch_metrics_enabled = false
-  #     metric_name                = "${var.app_name}-${var.env}-rate-rule-metric"
-  #     sampled_requests_enabled   = false
-  #   }
-  # }
+    visibility_config {
+      cloudwatch_metrics_enabled = false
+      metric_name                = "${var.app_name}-${var.env}-rate-rule-metric"
+      sampled_requests_enabled   = false
+    }
+  }
 
   rule {
     name     = "default"
@@ -91,7 +91,7 @@ resource "aws_wafv2_web_acl" "acl" {
 }
 
 resource "aws_wafv2_web_acl_association" "_" {
-  for_each     = var.is_cloudfront ? []:toset(var.resource_arn_list)
+  for_each     = var.is_cloudfront ? [] : toset(var.resource_arn_list)
   resource_arn = each.key
   web_acl_arn  = aws_wafv2_web_acl.acl.arn
 }
