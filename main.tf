@@ -13,7 +13,7 @@ resource "aws_wafv2_web_acl" "acl" {
   scope       = var.is_cloudfront ? "CLOUDFRONT" : "REGIONAL"
 
   default_action {
-    block {}
+    allow {}
   }
 
   rule {
