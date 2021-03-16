@@ -60,26 +60,26 @@ resource "aws_wafv2_web_acl" "acl" {
     }
   }
 
-  # rule {
-  #   name     = "blocklist"
-  #   priority = 3
+  rule {
+    name     = "blocklist"
+    priority = 3
 
-  #   override_action {
-  #     none {}
-  #   }
+    override_action {
+      none {}
+    }
 
-  #   statement {
-  #     ip_set_reference_statement {
-  #       arn = aws_wafv2_ip_set.blacklist.arn
-  #     }
-  #   }
+    statement {
+      ip_set_reference_statement {
+        arn = aws_wafv2_ip_set.blacklist.arn
+      }
+    }
 
-  #   visibility_config {
-  #     cloudwatch_metrics_enabled = false
-  #     metric_name                = "${var.app_name}-${var.env}-blocklist-rule-metric"
-  #     sampled_requests_enabled   = false
-  #   }
-  # }
+    visibility_config {
+      cloudwatch_metrics_enabled = false
+      metric_name                = "${var.app_name}-${var.env}-blocklist-rule-metric"
+      sampled_requests_enabled   = false
+    }
+  }
 
   tags = var.tags
 
