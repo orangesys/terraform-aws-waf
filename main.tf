@@ -16,27 +16,27 @@ resource "aws_wafv2_web_acl" "acl" {
     block {}
   }
 
-  # rule {
-  #   name     = "rate"
-  #   priority = 1
+  rule {
+    name     = "rate"
+    priority = 1
 
-  #   action {
-  #     count {}
-  #   }
+    action {
+      block {}
+    }
 
-  #   statement {
-  #     rate_based_statement {
-  #       limit              = 10000
-  #       aggregate_key_type = "IP"
-  #     }
-  #   }
+    statement {
+      rate_based_statement {
+        limit              = 10000
+        aggregate_key_type = "IP"
+      }
+    }
 
-  #   visibility_config {
-  #     cloudwatch_metrics_enabled = false
-  #     metric_name                = "${var.app_name}-${var.env}-rate-rule-metric"
-  #     sampled_requests_enabled   = false
-  #   }
-  # }
+    visibility_config {
+      cloudwatch_metrics_enabled = false
+      metric_name                = "${var.app_name}-${var.env}-rate-rule-metric"
+      sampled_requests_enabled   = false
+    }
+  }
 
   rule {
     name     = "default"
@@ -65,9 +65,9 @@ resource "aws_wafv2_web_acl" "acl" {
     priority = 3
 
     action {
-      allow {}
+      block {}
     }
-    
+
     statement {
       ip_set_reference_statement {
         arn = aws_wafv2_ip_set.blacklist.arn
