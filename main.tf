@@ -91,7 +91,7 @@ resource "aws_wafv2_web_acl" "acl" {
 }
 
 resource "aws_wafv2_web_acl_association" "_" {
-  for_each     = toset(var.resource_arn_list)
+  for_each     = var.is_cloudfront ? []:toset(var.resource_arn_list)
   resource_arn = each.key
   web_acl_arn  = aws_wafv2_web_acl.acl.arn
 }
