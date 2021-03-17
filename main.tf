@@ -50,6 +50,14 @@ resource "aws_wafv2_web_acl" "acl" {
       managed_rule_group_statement {
         name        = "AWSManagedRulesCommonRuleSet"
         vendor_name = "AWS"
+
+        excluded_rule {
+          name = "SizeRestrictions_QUERYSTRING"
+        }
+
+        excluded_rule {
+          name = "SizeRestrictions_BODY"
+        }
       }
     }
 
