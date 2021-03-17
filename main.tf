@@ -8,7 +8,7 @@ resource "aws_wafv2_ip_set" "blacklist" {
 }
 
 resource "aws_wafv2_web_acl" "acl" {
-  name        = "${var.app_name}-web-acls"
+  name        = "${var.app_name}-web-acls-${var.env}"
   description = "Web ACLs"
   scope       = var.is_cloudfront ? "CLOUDFRONT" : "REGIONAL"
 
