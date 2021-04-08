@@ -18,7 +18,7 @@ resource "aws_wafv2_web_acl" "acl" {
 
   rule {
     name     = "rate"
-    priority = 1
+    priority = 0
 
     action {
       count {}
@@ -40,7 +40,7 @@ resource "aws_wafv2_web_acl" "acl" {
 
   rule {
     name     = "default"
-    priority = 2
+    priority = 1
 
     override_action {
       none {}
@@ -58,12 +58,6 @@ resource "aws_wafv2_web_acl" "acl" {
         excluded_rule {
           name = "SizeRestrictions_BODY"
         }
-
-        scope_down_statement {
-          not_statement {
-            country_codes = ["US", "NL"]
-          }
-        }
       }
     }
 
@@ -76,7 +70,7 @@ resource "aws_wafv2_web_acl" "acl" {
 
   rule {
     name     = "blocklist"
-    priority = 3
+    priority = 2
 
     action {
       block {}
