@@ -58,6 +58,12 @@ resource "aws_wafv2_web_acl" "acl" {
         excluded_rule {
           name = "SizeRestrictions_BODY"
         }
+
+        scope_down_statement {
+          not_statement {
+            country_codes = ["US", "NL"]
+          }
+        }
       }
     }
 
