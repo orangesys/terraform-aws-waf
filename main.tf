@@ -87,6 +87,28 @@ resource "aws_wafv2_web_acl" "acl" {
     }
   }
 
+  rule {
+    name     = "BadInput"
+    priority = 3
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = false
+      metric_name                = "${var.app_name}-${var.env}-bad-input-metric"
+      sampled_requests_enabled   = false
+    }
+  }
+
   tags = var.tags
 
   visibility_config {
