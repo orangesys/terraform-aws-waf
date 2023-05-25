@@ -1,3 +1,8 @@
+provider "aws" {
+  alias  = "global"
+  region = "us-east-1"
+}
+
 resource "aws_wafv2_ip_set" "blacklist" {
   name               = "${var.app_name}-blacklist-${var.env}"
   description        = "Blacklist IP set"
@@ -232,4 +237,20 @@ resource "aws_wafv2_web_acl_association" "_" {
   for_each     = var.is_cloudfront ? [] : toset(var.resource_arn_list)
   resource_arn = each.key
   web_acl_arn  = aws_wafv2_web_acl.acl.arn
+}
+
+resource "aws_cloudwatch_log_group" "_" {
+  name = "${var.app_name}-${var.env}-web-acls-logs"
+
+  tags = var.tags
+  retention_in_days = 30
+}
+
+resource "aws_wafv2_web_acl_logging_configuration" "_" {
+  log_destination_configs = [aws_cloudwatch_log_group._.arn]
+  provider                = aws.global
+  resource_arn            = aws_wafv2_web_acl.acl.arn
+  redacted_fields {
+    uri_path {}
+  }
 }
