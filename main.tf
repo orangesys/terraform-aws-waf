@@ -240,7 +240,7 @@ resource "aws_wafv2_web_acl_association" "_" {
 }
 
 resource "aws_cloudwatch_log_group" "_" {
-  name = "${var.app_name}-${var.env}-web-acls-logs"
+  name = "aws-waf-logs-${var.app_name}-${var.env}"
 
   tags = var.tags
   retention_in_days = 30
@@ -248,7 +248,6 @@ resource "aws_cloudwatch_log_group" "_" {
 
 resource "aws_wafv2_web_acl_logging_configuration" "_" {
   log_destination_configs = [aws_cloudwatch_log_group._.arn]
-  provider                = aws.global
   resource_arn            = aws_wafv2_web_acl.acl.arn
   redacted_fields {
     uri_path {}
