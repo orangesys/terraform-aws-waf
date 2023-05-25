@@ -1,3 +1,8 @@
+provider "aws" {
+  alias  = "global"
+  region = "us-east-1"
+}
+
 resource "aws_wafv2_ip_set" "blacklist" {
   name               = "${var.app_name}-blacklist-${var.env}"
   description        = "Blacklist IP set"
@@ -16,9 +21,42 @@ resource "aws_wafv2_web_acl" "acl" {
     allow {}
   }
 
+  tags = var.tags
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "${var.app_name}-${var.env}-wafv2-metric"
+    sampled_requests_enabled   = true
+  }
+
+##################################################################
+# IPBlocklist
+##################################################################
   rule {
-    name     = "rate"
+    name     = "blocklist"
     priority = 0
+
+    action {
+      block {}
+    }
+
+    statement {
+      ip_set_reference_statement {
+        arn = aws_wafv2_ip_set.blacklist.arn
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.app_name}-${var.env}-blocklist-rule-metric"
+      sampled_requests_enabled   = true
+    }
+  }
+##################################################################
+# Rate-Limit
+##################################################################
+  rule {
+    name     = "rate-limit"
+    priority = 1
 
     action {
       count {}
@@ -32,15 +70,70 @@ resource "aws_wafv2_web_acl" "acl" {
     }
 
     visibility_config {
-      cloudwatch_metrics_enabled = false
-      metric_name                = "${var.app_name}-${var.env}-rate-rule-metric"
-      sampled_requests_enabled   = false
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.app_name}-${var.env}-rate-limit-rule-metric"
+      sampled_requests_enabled   = true
+    }
+  }
+##################################################################
+# AWSManagedRulesAmazonIpReputationList
+##################################################################
+  rule {
+    name     = "AWS-AWSManagedRulesAmazonIpReputationList"
+    priority = 2
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesAmazonIpReputationList"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.app_name}-${var.env}-AWS-AWSManagedRulesAmazonIpReputationList"
+      sampled_requests_enabled   = true
     }
   }
 
+##################################################################
+# AWSManagedRulesAnonymousIpList
+##################################################################
   rule {
-    name     = "default"
-    priority = 1
+    name     = "AWS-AWSManagedRulesAnonymousIpList"
+    priority = 3
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesAnonymousIpList"
+        vendor_name = "AWS"
+
+        excluded_rule {
+          name = "HostingProviderIPList"
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.app_name}-${var.env}-AWS-AWSManagedRulesAnonymousIpList"
+      sampled_requests_enabled   = true
+    }
+  }
+##################################################################
+# AWSManagedRulesCommonRuleSet
+##################################################################
+  rule {
+    name     = "AWS-AWSManagedRulesCommonRuleSet"
+    priority = 4
 
     override_action {
       none {}
@@ -60,36 +153,18 @@ resource "aws_wafv2_web_acl" "acl" {
     }
 
     visibility_config {
-      cloudwatch_metrics_enabled = false
-      metric_name                = "${var.app_name}-${var.env}-default-rule-metric"
-      sampled_requests_enabled   = false
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.app_name}-${var.env}-AWSManagedRulesCommonRuleSet"
+      sampled_requests_enabled   = true
     }
   }
 
+##################################################################
+# AWSManagedRulesKnownBadInputsRuleSet
+##################################################################
   rule {
-    name     = "blocklist"
-    priority = 2
-
-    action {
-      block {}
-    }
-
-    statement {
-      ip_set_reference_statement {
-        arn = aws_wafv2_ip_set.blacklist.arn
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = false
-      metric_name                = "${var.app_name}-${var.env}-blocklist-rule-metric"
-      sampled_requests_enabled   = false
-    }
-  }
-
-  rule {
-    name     = "BadInput"
-    priority = 3
+    name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+    priority = 5
 
     override_action {
       none {}
@@ -103,18 +178,58 @@ resource "aws_wafv2_web_acl" "acl" {
     }
 
     visibility_config {
-      cloudwatch_metrics_enabled = false
+      cloudwatch_metrics_enabled = true
       metric_name                = "${var.app_name}-${var.env}-bad-input-metric"
-      sampled_requests_enabled   = false
+      sampled_requests_enabled   = true
     }
   }
+##################################################################
+# AWSManagedRulesUnixRuleSet
+##################################################################
+  rule {
+    name     = "AWS-AWSManagedRulesUnixRuleSet"
+    priority = 6
 
-  tags = var.tags
+    override_action {
+      none {}
+    }
 
-  visibility_config {
-    cloudwatch_metrics_enabled = false
-    metric_name                = "${var.app_name}-${var.env}-metric"
-    sampled_requests_enabled   = false
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesUnixRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.app_name}-${var.env}-AWS-AWSManagedRulesUnixRuleSet"
+      sampled_requests_enabled   = true
+    }
+  }
+##################################################################
+# AWSManagedRulesSQLiRuleSet
+##################################################################
+  rule {
+    name     = "AWS-AWSManagedRulesSQLiRuleSet"
+    priority = 7
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesSQLiRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.app_name}-${var.env}-AWS-AWSManagedRulesSQLiRuleSet"
+      sampled_requests_enabled   = true
+    }
   }
 }
 
@@ -122,4 +237,19 @@ resource "aws_wafv2_web_acl_association" "_" {
   for_each     = var.is_cloudfront ? [] : toset(var.resource_arn_list)
   resource_arn = each.key
   web_acl_arn  = aws_wafv2_web_acl.acl.arn
+}
+
+resource "aws_cloudwatch_log_group" "_" {
+  name = "aws-waf-logs-${var.app_name}-${var.env}"
+
+  tags = var.tags
+  retention_in_days = 30
+}
+
+resource "aws_wafv2_web_acl_logging_configuration" "_" {
+  log_destination_configs = [aws_cloudwatch_log_group._.arn]
+  resource_arn            = aws_wafv2_web_acl.acl.arn
+  redacted_fields {
+    uri_path {}
+  }
 }
